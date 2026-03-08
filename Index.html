@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hospital Management System</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:linear-gradient(120deg,#89f7fe,#66a6ff);
+}
+
+/* Navbar */
+
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#2c3e50;
+color:white;
+padding:15px 30px;
+}
+
+.navbar button{
+background:#e74c3c;
+border:none;
+color:white;
+padding:8px 15px;
+cursor:pointer;
+border-radius:5px;
+}
+
+/* Card */
+
+.card{
+width:350px;
+margin:80px auto;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.3);
+text-align:center;
+}
+
+input{
+width:90%;
+padding:10px;
+margin:10px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+button{
+padding:10px 20px;
+background:#27ae60;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+/* Dashboard */
+
+.dashboard{
+display:flex;
+justify-content:center;
+gap:30px;
+margin-top:60px;
+}
+
+.box{
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 4px 10px gray;
+cursor:pointer;
+}
+
+/* Table */
+
+table{
+width:80%;
+margin:30px auto;
+border-collapse:collapse;
+background:white;
+}
+
+th{
+background:#34495e;
+color:white;
+padding:10px;
+}
+
+td{
+padding:10px;
+border:1px solid #ddd;
+text-align:center;
+}
+
+#recordsPage{
+display:none;
+}
+
+#addPage{
+display:none;
+}
+
+#dashboard{
+display:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+
+<div class="card" id="loginPage">
+
+<h2>🏥 Hospital Login</h2>
+
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<p id="msg"></p>
+
+</div>
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboard">
+
+<div class="navbar">
+<h2>Hospital Dashboard</h2>
+<button onclick="logout()">Logout</button>
+</div>
+
+<div class="dashboard">
+
+<div class="box" onclick="showAdd()">
+➕ Add Patient
+</div>
+
+<div class="box" onclick="showRecords()">
+📄 Patient Records
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ADD PATIENT -->
+
+<div id="addPage">
+
+<div class="navbar">
+<h2>Add Patient</h2>
+<button onclick="showDashboard()">Back</button>
+</div>
+
+<div class="card">
+
+<input type="text" id="name" placeholder="Patient Name">
+<input type="number" id="age" placeholder="Age">
+<input type="text" id="disease" placeholder="Disease">
+<input type="text" id="doctor" placeholder="Doctor">
+
+<button onclick="savePatient()">Save Patient</button>
+
+</div>
+
+</div>
+
+
+<!-- RECORDS PAGE -->
+
+<div id="recordsPage">
+
+<div class="navbar">
+<h2>Patient Records</h2>
+<button onclick="showDashboard()">Back</button>
+</div>
+
+<input type="text" id="search" placeholder="Search Patient" onkeyup="searchPatient()" style="margin-left:10%;padding:10px">
+
+<table id="table">
+
+<tr>
+<th>Name</th>
+<th>Age</th>
+<th>Disease</th>
+<th>Doctor</th>
+<th>Action</th>
+</tr>
+
+</table>
+
+</div>
+
+
+<script>
+
+function login(){
+
+let u=document.getElementById("username").value;
+let p=document.getElementById("password").value;
+
+if(u=="admin" && p=="1234"){
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("dashboard").style.display="block";
+
+}
+else{
+
+document.getElementById("msg").innerHTML="Invalid Login";
+
+}
+
+}
+
+function logout(){
+
+location.reload();
+
+}
+
+function showAdd(){
+
+document.getElementById("dashboard").style.display="none";
+document.getElementById("addPage").style.display="block";
+
+}
+
+function showRecords(){
+
+document.getElementById("dashboard").style.display="none";
+document.getElementById("recordsPage").style.display="block";
+
+loadPatients();
+
+}
+
+function showDashboard(){
+
+document.getElementById("addPage").style.display="none";
+document.getElementById("recordsPage").style.display="none";
+document.getElementById("dashboard").style.display="block";
+
+}
+
+function savePatient(){
+
+let name=document.getElementById("name").value;
+let age=document.getElementById("age").value;
+let disease=document.getElementById("disease").value;
+let doctor=document.getElementById("doctor").value;
+
+let patients=JSON.parse(localStorage.getItem("patients")) || [];
+
+patients.push({name,age,disease,doctor});
+
+localStorage.setItem("patients",JSON.stringify(patients));
+
+alert("Patient Saved Successfully");
+
+}
+
+function loadPatients(){
+
+let patients=JSON.parse(localStorage.getItem("patients")) || [];
+
+let table=document.getElementById("table");
+
+table.innerHTML=
+`<tr>
+<th>Name</th>
+<th>Age</th>
+<th>Disease</th>
+<th>Doctor</th>
+<th>Action</th>
+</tr>`;
+
+patients.forEach((p,i)=>{
+
+let row=table.insertRow();
+
+row.insertCell(0).innerHTML=p.name;
+row.insertCell(1).innerHTML=p.age;
+row.insertCell(2).innerHTML=p.disease;
+row.insertCell(3).innerHTML=p.doctor;
+
+row.insertCell(4).innerHTML=
+`<button onclick="deletePatient(${i})">Delete</button>`;
+
+});
+
+}
+
+function deletePatient(i){
+
+let patients=JSON.parse(localStorage.getItem("patients"));
+
+patients.splice(i,1);
+
+localStorage.setItem("patients",JSON.stringify(patients));
+
+loadPatients();
+
+}
+
+function searchPatient(){
+
+let input=document.getElementById("search").value.toLowerCase();
+
+let rows=document.querySelectorAll("#table tr");
+
+rows.forEach((row,index)=>{
+
+if(index===0) return;
+
+let name=row.cells[0].innerText.toLowerCase();
+
+row.style.display=name.includes(input) ? "" : "none";
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
